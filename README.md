@@ -90,3 +90,11 @@ JE-002 is January product sales: line 1 debits 1100 for 12450.75, and line 2 cre
   `demo '.journal_entries[1].status = "pending"'` → `JE-002 has unknown status 'pending'`
 - **MinimumTwoLinesRule:** an entry has at least 2 lines.
   `demo 'del(.journal_entries[1].lines)'` → `JE-002 has 0 lines; an entry needs at least 2`
+
+## Screenshot
+
+Q1 2026 (2026-01-01 to 2026-03-31) in the browser: net income **(44,480.14)**, negatives in parentheses.
+The Network panel has a different, earlier request selected (its 4100 line is 2000.00, which matches an end
+date of 2026-03-30, before JE-021 on March 31); the page itself shows the Q1 response.
+
+![Income statement for Q1 2026](docs/images/income-statement-q1.png)
