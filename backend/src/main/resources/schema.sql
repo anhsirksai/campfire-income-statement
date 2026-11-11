@@ -1,7 +1,10 @@
 -- Mirrors data/ledger.json. Amounts are exact decimals, never floating point.
 -- Enum-like columns keep the lowercase values from the JSON (e.g. 'posted', 'operating_revenue').
+-- Why this differs from the data dictionary: spec.md §4.1.
+-- CHECK constraints are a second guard behind the validation rules (which run first, at startup).
 
 CREATE TABLE company (
+    id       UUID         DEFAULT RANDOM_UUID() PRIMARY KEY,
     name     VARCHAR(200) NOT NULL,
     currency VARCHAR(3)   NOT NULL
 );
@@ -17,8 +20,9 @@ CREATE TABLE accounts (
 CREATE TABLE journal_entries (
     id         VARCHAR(40)  PRIMARY KEY,
     entry_date DATE         NOT NULL,  -- accounting date, no time zone
-    status     VARCHAR(10)  NOT NULL,  -- posted | draft | void
-    memo       VARCHAR(500)
+    status     VARCHAR(10)  NOT NULL,
+    memo       VARCHAR(500),
+    CONSTRAINT chk_entry_status CHECK (status IN ('posted', 'draft', 'void'))
 );
 
 CREATE TABLE journal_lines (
@@ -27,8 +31,13 @@ CREATE TABLE journal_lines (
     line_no        INT            NOT NULL,  -- position within the entry, from the JSON array order
     account_number VARCHAR(20)    NOT NULL REFERENCES accounts (number),
     debit          DECIMAL(19, 2) NOT NULL,
-    credit         DECIMAL(19, 2) NOT NULL
+    credit         DECIMAL(19, 2) NOT NULL,
+    CONSTRAINT uq_line_position   UNIQUE (entry_id, line_no),
+    CONSTRAINT chk_line_non_negative CHECK (debit >= 0 AND credit >= 0),
+    CONSTRAINT chk_line_one_sided CHECK ((debit = 0) <> (credit = 0))
 );
 
-CREATE INDEX idx_journal_entries_date_status ON journal_entries (entry_date, status);
-CREATE INDEX idx_journal_lines_entry ON journal_lines (entry_id);
+-- Equality column first, then the range: WHERE status = :status AND entry_date BETWEEN :start AND :end.
+-- No separate index on journal_lines(entry_id): H2 already indexes each foreign key, and
+-- uq_line_position starts with entry_id.
+CREATE INDEX idx_journal_entries_status_date ON journal_entries (status, entry_date);

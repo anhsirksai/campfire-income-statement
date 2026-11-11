@@ -57,6 +57,32 @@ rules loaded. Set `org.springframework.jdbc.core` to DEBUG to see SQL.
 (`entry_id`, `line_no`, `account_number`, `debit DECIMAL(19,2)`, `credit DECIMAL(19,2)`).
 Enum-like columns store the JSON's lowercase values.
 
+### 4.1 Schema vs the data dictionary
+| Difference | Why |
+| --- | --- |
+| `lines[]` → own table `journal_lines` (FK `entry_id`) | One-to-many. The statement is "sum lines per account, posted, in range": one JOIN + GROUP BY. The general ledger *is* the set of lines. Drill-down, balance sheet, "include drafts" become WHERE/GROUP BY changes. |
+| `line_no` added | SQL rows have no order; keeps the entry's lines as recorded (audit trail). `UNIQUE (entry_id, line_no)`. |
+| `journal_lines.id` surrogate key | Lines have no id in the data; a stable handle for future drill-down links. |
+| `date` → `entry_date` | `DATE` is a reserved word/type; the name also says it is the accounting date. |
+| `lines[].account` → `account_number` | It is the account's number, an FK to `accounts.number`. |
+| `debit`/`credit` → `DECIMAL(19,2)` | Dictionary says decimal strings: exact storage, no float drift. |
+| `date` → `DATE` | "No time or time zone". |
+| `number`, `id` → `VARCHAR` | Strings in the data; identifiers, not quantities (keeps leading zeros). |
+| `type`/`subtype`/`status` → lowercase `VARCHAR` | Stored values match the source; Java enums map them with `fromCode`. |
+| New `company` table, `id UUID` PK | `company`/`currency` are root-level JSON fields the response needs. UUID key so a second entity can be added later. |
+| Draft and void entries stored | Void "stays on record for the audit trail"; filtering is in the query. |
+
+**Constraints as a second guard.** The validation rules (spec §7) check the ledger before any insert. The
+database repeats the row-level ones so a direct insert cannot bypass them: FKs on `entry_id` and
+`account_number`, `status IN ('posted','draft','void')`, `debit >= 0 AND credit >= 0`, and exactly one of
+debit/credit non-zero. "Entry is balanced" spans rows, so it stays a rule only (`EntryBalancedRule`).
+
+**Indexes.** `idx_journal_entries_status_date (status, entry_date)`: equality column first, then the date
+range, matching the statement's WHERE. No separate `journal_lines(entry_id)` index: H2 indexes every FK, and
+`UNIQUE (entry_id, line_no)` already leads with `entry_id`. At 25 entries indexes are not measurable; they
+document the access path. Next if the ledger grows: index `journal_lines(account_number)` for per-account
+drill-down (needed explicitly on PostgreSQL, which does not auto-index FKs).
+
 `LedgerDataLoader` (ApplicationRunner): read `app.ledger-file` with Jackson (amounts as `BigDecimal`),
 build a `LedgerSnapshot`, run ledger rules through `ValidationRegistry`; any error → `LedgerDataException`
 (app refuses to start). Then insert company, accounts, entries, lines via DAOs. All entries are stored
