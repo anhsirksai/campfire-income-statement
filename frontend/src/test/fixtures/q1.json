@@ -1,0 +1,48 @@
+{
+  "company": "Northwind Coffee Roasters",
+  "currency": "USD",
+  "start": "2026-01-01",
+  "end": "2026-03-31",
+  "sections": [
+    {
+      "key": "REVENUE",
+      "title": "Revenue",
+      "total": "37850.50",
+      "lines": [
+        { "accountNumber": "4000", "accountName": "Product Revenue", "amount": "35650.75" },
+        { "accountNumber": "4100", "accountName": "Subscription Revenue", "amount": "3000.00" },
+        { "accountNumber": "4900", "accountName": "Sales Returns & Discounts", "amount": "-800.25" }
+      ]
+    },
+    {
+      "key": "COGS",
+      "title": "Cost of goods sold",
+      "total": "14272.75",
+      "lines": [
+        { "accountNumber": "5000", "accountName": "Cost of Goods Sold", "amount": "14272.75" }
+      ]
+    },
+    {
+      "key": "OPERATING_EXPENSES",
+      "title": "Operating expenses",
+      "total": "68100.07",
+      "lines": [
+        { "accountNumber": "6000", "accountName": "Salaries", "amount": "55500.00" },
+        { "accountNumber": "6100", "accountName": "Rent", "amount": "9000.00" },
+        { "accountNumber": "6200", "accountName": "Software", "amount": "1099.97" },
+        { "accountNumber": "6300", "accountName": "Marketing (legacy)", "amount": "2500.10" }
+      ]
+    },
+    {
+      "key": "OTHER_INCOME",
+      "title": "Other income",
+      "total": "42.18",
+      "lines": [
+        { "accountNumber": "7000", "accountName": "Interest Income", "amount": "42.18" }
+      ]
+    }
+  ],
+  "grossProfit": "23577.75",
+  "operatingIncome": "-44522.32",
+  "netIncome": "-44480.14"
+}

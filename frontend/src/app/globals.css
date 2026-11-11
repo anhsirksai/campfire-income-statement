@@ -1,0 +1,177 @@
+:root {
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+  --muted: #6b6b6b;
+  --rule: #d4d4d4;
+  --negative: #b42318;
+  --error-bg: #fef3f2;
+  --error-border: #fda29b;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #111111;
+    --foreground: #ededed;
+    --muted: #a0a0a0;
+    --rule: #3a3a3a;
+    --negative: #f97066;
+    --error-bg: #2a1210;
+    --error-border: #912018;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--foreground);
+  background: var(--background);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+}
+
+.page {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+}
+
+h1 {
+  font-size: 1.5rem;
+  margin: 0 0 1rem;
+}
+
+/* Date range form */
+.range-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.range-form label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.range-form input,
+.range-form button {
+  font: inherit;
+  padding: 0.4rem 0.6rem;
+}
+
+.range-form button {
+  cursor: pointer;
+}
+
+.form-error {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--negative);
+}
+
+.error-box {
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  border-radius: 4px;
+}
+
+.error-box ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.status {
+  color: var(--muted);
+}
+
+.stale {
+  opacity: 0.5;
+}
+
+/* Statement table */
+.statement {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.statement caption {
+  text-align: left;
+  margin-bottom: 1rem;
+}
+
+.statement caption span {
+  display: block;
+}
+
+.statement caption .company {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.statement caption .period {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.statement th,
+.statement td {
+  padding: 0.3rem 0.5rem;
+  text-align: left;
+  font-weight: normal;
+}
+
+.statement thead th {
+  color: var(--muted);
+  font-size: 0.85rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.statement .amount {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.statement .negative {
+  color: var(--negative);
+}
+
+.statement .section-heading th {
+  font-weight: 600;
+  padding-top: 1rem;
+}
+
+.statement .line td:first-child {
+  padding-left: 1.5rem;
+}
+
+.statement .line.empty td:first-child {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.statement .section-total th,
+.statement .section-total td {
+  border-top: 1px solid var(--rule);
+}
+
+.statement .subtotal th,
+.statement .subtotal td {
+  font-weight: 600;
+  padding-top: 0.75rem;
+}
+
+.statement .net-income th,
+.statement .net-income td {
+  font-weight: 700;
+  border-bottom: 3px double var(--foreground);
+}
