@@ -6,7 +6,12 @@ export type IncomeStatementResult =
 
 const NETWORK_ERROR = "Could not reach the server. Is the backend running?";
 
-/** Fetch the income statement for an inclusive date range (YYYY-MM-DD). */
+const UNREADABLE_RESPONSE = "Could not read the server's response. Please try again.";
+
+/**
+ * Fetch the income statement for an inclusive date range (YYYY-MM-DD).
+ * Never rejects: every failure comes back as {ok: false, errors}, so callers can always clear their loading state.
+ */
 export async function getIncomeStatement(start: string, end: string): Promise<IncomeStatementResult> {
   const query = new URLSearchParams({ start, end });
   let response: Response;
@@ -19,8 +24,13 @@ export async function getIncomeStatement(start: string, end: string): Promise<In
   }
 
   if (response.ok) {
-    const data = (await response.json()) as IncomeStatement;
-    return { ok: true, data };
+    try {
+      const data = (await response.json()) as IncomeStatement;
+      return { ok: true, data };
+    } catch {
+      // Truncated or malformed body, or the connection dropped while reading it.
+      return { ok: false, errors: [UNREADABLE_RESPONSE] };
+    }
   }
   return { ok: false, errors: await readProblemErrors(response) };
 }

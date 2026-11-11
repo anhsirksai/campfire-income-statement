@@ -50,6 +50,13 @@ describe("getIncomeStatement", () => {
     });
   });
 
+  it("returns an error instead of rejecting when a 200 body is not valid JSON", async () => {
+    mockFetch(async () => new Response('{"company":"Northwind', { status: 200 }));
+    const result = await getIncomeStatement("2026-01-01", "2026-03-31");
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.errors[0]).toMatch(/could not read/i);
+  });
+
   it("returns a friendly message on network failure", async () => {
     mockFetch(async () => {
       throw new TypeError("Failed to fetch");
