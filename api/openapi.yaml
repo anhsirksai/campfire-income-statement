@@ -1,0 +1,100 @@
+openapi: 3.0.3
+info:
+  title: Income Statement API
+  version: 0.1.0
+  description: |
+    Contract between backend/ (Spring Boot) and frontend/ (Next.js). This file is the source of truth.
+    Change it on main only, then regenerate frontend types (`npm run gen:api`) and update backend DTOs
+    in `com.campfire.ledger.model.dto`.
+
+    Money: every amount is a decimal STRING with exactly 2 fractional digits, e.g. "-44480.14".
+    Negative means "reduces net income" for that line (e.g. contra revenue). Clients must never
+    parse amounts into binary floating point.
+servers:
+  - url: http://localhost:8080
+paths:
+  /income-statement:
+    get:
+      operationId: getIncomeStatement
+      summary: Income statement (P&L) for an inclusive date range
+      parameters:
+        - name: start
+          in: query
+          required: true
+          description: First day included (YYYY-MM-DD).
+          schema: { type: string, format: date, example: "2026-01-01" }
+        - name: end
+          in: query
+          required: true
+          description: Last day included (YYYY-MM-DD). Must be on or after start.
+          schema: { type: string, format: date, example: "2026-03-31" }
+      responses:
+        "200":
+          description: The statement
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/IncomeStatement" }
+        "400":
+          description: Missing, malformed, or inverted dates
+          content:
+            application/problem+json:
+              schema: { $ref: "#/components/schemas/Problem" }
+components:
+  schemas:
+    Money:
+      type: string
+      pattern: '^-?\d+\.\d{2}$'
+      example: "12450.75"
+    IncomeStatement:
+      type: object
+      required: [company, currency, start, end, sections, grossProfit, operatingIncome, netIncome]
+      properties:
+        company: { type: string, example: "Northwind Coffee Roasters" }
+        currency: { type: string, example: "USD" }
+        start: { type: string, format: date }
+        end: { type: string, format: date }
+        sections:
+          type: array
+          description: Always the four sections, in this order - REVENUE, COGS, OPERATING_EXPENSES, OTHER_INCOME.
+          items: { $ref: "#/components/schemas/Section" }
+        grossProfit:
+          $ref: "#/components/schemas/Money"
+        operatingIncome:
+          $ref: "#/components/schemas/Money"
+        netIncome:
+          $ref: "#/components/schemas/Money"
+    Section:
+      type: object
+      required: [key, title, lines, total]
+      properties:
+        key:
+          type: string
+          enum: [REVENUE, COGS, OPERATING_EXPENSES, OTHER_INCOME]
+        title: { type: string, example: "Revenue" }
+        lines:
+          type: array
+          description: One line per account with posted activity in the range, ordered by account number.
+          items: { $ref: "#/components/schemas/Line" }
+        total:
+          $ref: "#/components/schemas/Money"
+    Line:
+      type: object
+      required: [accountNumber, accountName, amount]
+      properties:
+        accountNumber: { type: string, example: "4000" }
+        accountName: { type: string, example: "Product Revenue" }
+        amount:
+          $ref: "#/components/schemas/Money"
+    Problem:
+      description: RFC 7807 problem details (Spring ProblemDetail).
+      type: object
+      required: [status, title]
+      properties:
+        type: { type: string }
+        title: { type: string, example: "Bad Request" }
+        status: { type: integer, example: 400 }
+        detail: { type: string, example: "start must be on or before end" }
+        instance: { type: string }
+        errors:
+          type: array
+          items: { type: string }
