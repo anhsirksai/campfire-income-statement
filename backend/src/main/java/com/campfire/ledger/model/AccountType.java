@@ -1,5 +1,7 @@
 package com.campfire.ledger.model;
 
+import java.util.Locale;
+
 /** Account type from the chart of accounts. Decides the normal balance (see strategy package). */
 public enum AccountType {
     ASSET,
@@ -10,6 +12,6 @@ public enum AccountType {
 
     /** Maps the lowercase value used in ledger.json and the database. */
     public static AccountType fromCode(String code) {
-        return valueOf(code.toUpperCase());
+        return valueOf(code.toUpperCase(Locale.ROOT));
     }
 }

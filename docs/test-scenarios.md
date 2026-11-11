@@ -31,17 +31,20 @@ made 7 service tests fail, so the tests do catch real accounting mistakes.
 | Loader | Real ledger parses 15 accounts / 25 entries, exact BigDecimal | `LedgerDataLoaderTest.realLedgerParsesWithExactAmounts` |
 | Strategy | Debit-normal vs credit-normal sign per account type | `NormalBalanceStrategyFactoryTest` |
 | Rules | Start == end valid; start > end fails | `StartNotAfterEndRuleTest` |
+| Errors | Missing `start` and/or `end` → 400 "start is required" | `RequestValidationTest`, `DateRangePresentRuleTest` |
+| Rules | One test per ledger rule (pass + each failure mode) | `validation/src/test/.../*RuleTest` |
+| Rules | Real ledger passes every ledger rule | `RealLedgerRulesTest` |
+| Rules | Account type and subtype must agree (expense typed + operating_revenue fails) | `AccountClassificationRuleTest` |
+| Rules | Amounts have at most 2 decimals (`0.005` fails, `100.000` passes) | `AmountScaleRuleTest` |
+| Database | Direct inserts rejected: both sides, negative, duplicate line position, unknown status, type/subtype mismatch | `SchemaConstraintsTest` |
+| Frontend | Money formatting, Q1 table render, 400 → error message | `money.test.ts`, `IncomeStatementTable.test.tsx`, `client.test.ts` |
+| End to end | Verifier run: golden ranges and error cases | `docs/verification-report.md` |
 
 ## Not yet implemented
 
-| Area | Scenario | Owner |
+| Area | Scenario | Note |
 | --- | --- | --- |
-| Errors | Missing `start` and/or `end` → 400 "start is required" | Track B (`DateRangePresentRule`) |
-| Loader | Real ledger passes every plugin ledger rule (balanced, one-sided, known account, known status, non-negative) | Track B |
-| Rules | One test per ledger rule (pass + each failure mode) | Track B |
-| Plugin | Rules loaded at runtime from the plugin jar, not the classpath | Track B |
-| Frontend | Money formatting: grouping, parentheses for negatives, zero | Track C |
-| Frontend | Table renders Q1 fixture: (44,480.14) net income, (800.25) for 4900 | Track C |
-| Frontend | Client maps a 400 problem response to an error message | Track C |
-| End to end | Verifier agent: run app, curl 5 golden ranges + error cases | After merge |
-| Edge | Very large range (all time) equals sum of sub-ranges | Nice to have |
+| Locale | Enum codes parse under a Turkish default locale | Fixed with `Locale.ROOT`; not tested (one-word change per call site) |
+| Edge | Very large range (all time) equals the sum of sub-ranges | Nice to have |
+
+Dropped: loading rules at runtime from a plugin jar (spec §7 explains why).

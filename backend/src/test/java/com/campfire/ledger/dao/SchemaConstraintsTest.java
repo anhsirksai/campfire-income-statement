@@ -37,6 +37,13 @@ class SchemaConstraintsTest {
     }
 
     @Test
+    void rejectsAccountWhoseTypeAndSubtypeDisagree() {
+        assertThatThrownBy(() -> jdbc.update(
+                "INSERT INTO accounts (number, name, type, subtype, is_active) VALUES ('9999', 'Bad', 'expense', 'operating_revenue', TRUE)"))
+                .isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
     void rejectsUnknownStatus() {
         assertThatThrownBy(() -> jdbc.update(
                 "INSERT INTO journal_entries (id, entry_date, status) VALUES ('JE-X', DATE '2026-01-01', 'pending')"))

@@ -2,6 +2,7 @@ package com.campfire.ledger.dao;
 
 import com.campfire.ledger.model.Account;
 import com.campfire.ledger.query.LedgerQueries;
+import java.util.Locale;
 import java.util.Map;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -20,8 +21,8 @@ public class AccountDao {
         jdbc.update(LedgerQueries.INSERT_ACCOUNT, Map.of(
                 "number", account.number(),
                 "name", account.name(),
-                "type", account.type().name().toLowerCase(),
-                "subtype", account.subtype().name().toLowerCase(),
+                "type", account.type().name().toLowerCase(Locale.ROOT),
+                "subtype", account.subtype().name().toLowerCase(Locale.ROOT),
                 "isActive", account.active()));
     }
 }

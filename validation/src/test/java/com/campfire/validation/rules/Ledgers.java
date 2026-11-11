@@ -4,18 +4,24 @@ import com.campfire.validation.api.LedgerSnapshot;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 /** Tiny builders for hand-made ledgers in rule tests. Amounts are strings so scale is exactly what the test says. */
 final class Ledgers {
 
-    static final Set<String> ACCOUNTS = Set.of("1000", "4000", "6000");
+    static final List<LedgerSnapshot.Account> ACCOUNTS = List.of(
+            new LedgerSnapshot.Account("1000", "asset", "balance_sheet"),
+            new LedgerSnapshot.Account("4000", "revenue", "operating_revenue"),
+            new LedgerSnapshot.Account("6000", "expense", "operating_expense"));
 
     private Ledgers() {
     }
 
     static LedgerSnapshot ledger(LedgerSnapshot.Entry... entries) {
         return new LedgerSnapshot(ACCOUNTS, List.of(entries));
+    }
+
+    static LedgerSnapshot accounts(LedgerSnapshot.Account... accounts) {
+        return new LedgerSnapshot(List.of(accounts), List.of());
     }
 
     static LedgerSnapshot.Entry entry(String id, LedgerSnapshot.Line... lines) {

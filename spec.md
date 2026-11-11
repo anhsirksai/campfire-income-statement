@@ -74,8 +74,13 @@ Enum-like columns store the JSON's lowercase values.
 
 **Constraints as a second guard.** The validation rules (spec §7) check the ledger before any insert. The
 database repeats the row-level ones so a direct insert cannot bypass them: FKs on `entry_id` and
-`account_number`, `status IN ('posted','draft','void')`, `debit >= 0 AND credit >= 0`, and exactly one of
-debit/credit non-zero. "Entry is balanced" spans rows, so it stays a rule only (`EntryBalancedRule`).
+`account_number`, `status IN ('posted','draft','void')`, `debit >= 0 AND credit >= 0`, exactly one of
+debit/credit non-zero, and type/subtype pairs that agree (`chk_account_classification`). "Entry is balanced"
+spans rows, so it stays a rule only (`EntryBalancedRule`). Amount scale is also rule-only (`AmountScaleRule`):
+`DECIMAL(19,2)` would silently round `0.005` rather than reject it.
+
+**Locale.** Enum codes convert with `Locale.ROOT`, so lowercase JSON codes map the same way on any machine
+(a Turkish default locale would otherwise uppercase `i` to `İ`).
 
 **Indexes.** `idx_journal_entries_status_date (status, entry_date)`: equality column first, then the date
 range, matching the statement's WHERE. No separate `journal_lines(entry_id)` index: H2 indexes every FK, and
@@ -158,7 +163,10 @@ Other ranges: Dec 2025 → NI 5,000.00 (JE-001 only). April 2026 → NI 9,100.00
 - Why not a runtime-loaded plugin jar (the first design): URLClassLoader + ServiceLoader added concepts the
   hand-extension round does not need. A normal dependency keeps "new rule = enum + one line" with nothing to deploy.
 - Request rules: `DateRangePresentRule`, `StartNotAfterEndRule`. Ledger rules: `EntryBalancedRule`,
-  `LineOneSidedRule`, `NonNegativeAmountRule`, `KnownAccountRule`, `KnownStatusRule`, `MinimumTwoLinesRule`.
+  `LineOneSidedRule`, `NonNegativeAmountRule`, `AmountScaleRule` (at most 2 decimals), `KnownAccountRule`,
+  `AccountClassificationRule` (type and subtype agree: the section comes from subtype, the sign from type),
+  `KnownStatusRule`, `MinimumTwoLinesRule`.
+- `LedgerSnapshot` carries `accounts` (number, type, subtype as raw codes) and `entries`; `accountNumbers()` is derived.
 
 ## 8. Frontend (`frontend/src/`)
 - `app/page.tsx`: client component, holds `start`/`end` state (default 2026-01-01..2026-03-31), fetches on submit.

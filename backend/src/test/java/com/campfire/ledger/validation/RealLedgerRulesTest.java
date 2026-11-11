@@ -10,9 +10,7 @@ import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -33,9 +31,10 @@ class RealLedgerRulesTest {
 
     private static LedgerSnapshot readLedger(Path file) throws Exception {
         JsonNode root = new ObjectMapper().readTree(file.toFile());
-        Set<String> accountNumbers = new HashSet<>();
+        List<LedgerSnapshot.Account> accounts = new ArrayList<>();
         for (JsonNode account : root.get("accounts")) {
-            accountNumbers.add(account.get("number").asText());
+            accounts.add(new LedgerSnapshot.Account(account.get("number").asText(),
+                    account.get("type").asText(), account.get("subtype").asText()));
         }
         List<LedgerSnapshot.Entry> entries = new ArrayList<>();
         for (JsonNode entry : root.get("journal_entries")) {
@@ -48,6 +47,6 @@ class RealLedgerRulesTest {
             entries.add(new LedgerSnapshot.Entry(entry.get("id").asText(),
                     LocalDate.parse(entry.get("date").asText()), entry.get("status").asText(), lines));
         }
-        return new LedgerSnapshot(accountNumbers, entries);
+        return new LedgerSnapshot(accounts, entries);
     }
 }

@@ -7,7 +7,6 @@ import com.campfire.validation.api.ReportPeriodInput;
 import com.campfire.validation.api.ValidationResult;
 import com.campfire.validation.api.ValidationRule;
 import java.util.List;
-import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 class ValidationRegistryTest {
@@ -23,7 +22,7 @@ class ValidationRegistryTest {
 
     @Test
     void ledgerInputRunsOnlyLedgerRules() {
-        assertThat(registry.validate(new LedgerSnapshot(Set.of(), List.of())))
+        assertThat(registry.validate(new LedgerSnapshot(List.of(), List.of())))
                 .containsExactly("ledger error");
     }
 

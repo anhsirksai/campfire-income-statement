@@ -18,8 +18,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -103,15 +101,15 @@ public class LedgerDataLoader implements ApplicationRunner {
     }
 
     private static LedgerSnapshot toSnapshot(LedgerFile file) {
-        Set<String> accountNumbers = file.accounts().stream()
-                .map(LedgerFile.AccountJson::number)
-                .collect(Collectors.toSet());
+        List<LedgerSnapshot.Account> accounts = file.accounts().stream()
+                .map(a -> new LedgerSnapshot.Account(a.number(), a.type(), a.subtype()))
+                .toList();
         List<LedgerSnapshot.Entry> entries = file.journalEntries().stream()
                 .map(e -> new LedgerSnapshot.Entry(e.id(), e.date(), e.status(), e.lines().stream()
                         .map(l -> new LedgerSnapshot.Line(l.account(), l.debit(), l.credit()))
                         .toList()))
                 .toList();
-        return new LedgerSnapshot(accountNumbers, entries);
+        return new LedgerSnapshot(accounts, entries);
     }
 
     private static Account toAccount(LedgerFile.AccountJson a) {

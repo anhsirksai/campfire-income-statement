@@ -14,7 +14,12 @@ CREATE TABLE accounts (
     name      VARCHAR(200) NOT NULL,
     type      VARCHAR(20)  NOT NULL,   -- asset | liability | equity | revenue | expense
     subtype   VARCHAR(40)  NOT NULL,   -- operating_revenue | contra_revenue | cogs | operating_expense | other_income | balance_sheet
-    is_active BOOLEAN      NOT NULL
+    is_active BOOLEAN      NOT NULL,
+    -- Section comes from subtype, sign from type, so they must agree (same pairs as AccountClassificationRule).
+    CONSTRAINT chk_account_classification CHECK (
+        (type = 'revenue' AND subtype IN ('operating_revenue', 'contra_revenue', 'other_income'))
+        OR (type = 'expense' AND subtype IN ('cogs', 'operating_expense'))
+        OR (type IN ('asset', 'liability', 'equity') AND subtype = 'balance_sheet'))
 );
 
 CREATE TABLE journal_entries (

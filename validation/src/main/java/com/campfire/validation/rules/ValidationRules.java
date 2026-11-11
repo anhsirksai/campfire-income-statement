@@ -18,7 +18,9 @@ public final class ValidationRules {
                 EntryBalancedRule.INSTANCE,
                 LineOneSidedRule.INSTANCE,
                 NonNegativeAmountRule.INSTANCE,
+                AmountScaleRule.INSTANCE,
                 KnownAccountRule.INSTANCE,
+                AccountClassificationRule.INSTANCE,
                 KnownStatusRule.INSTANCE,
                 MinimumTwoLinesRule.INSTANCE);
     }
