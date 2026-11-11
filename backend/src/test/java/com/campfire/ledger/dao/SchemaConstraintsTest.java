@@ -27,6 +27,11 @@ class SchemaConstraintsTest {
     }
 
     @Test
+    void rejectsLineWithNeitherSide() {
+        assertThatThrownBy(() -> insertLine(92, "0.00", "0.00")).isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
     void rejectsNegativeAmount() {
         assertThatThrownBy(() -> insertLine(91, "-10.00", "0.00")).isInstanceOf(DataIntegrityViolationException.class);
     }

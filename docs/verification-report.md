@@ -77,7 +77,7 @@ Every request below returns HTTP 400 as `application/problem+json`.
 ## Notes
 
 - The 6 ledger rules run at startup, and the app refuses to start if any of them fails, so a clean start shows that `ledger.json` passed them all. No log line says so explicitly. One added line in `LedgerDataLoader` would make that visible.
-- `SchemaConstraintsTest` has no case for a line where debit and credit are both 0. The one-sided check should reject that line too, and one more test would prove it.
+- This run found that `SchemaConstraintsTest` had no case for a line where debit and credit are both 0. `rejectsLineWithNeitherSide` now covers it. It was checked against a weakened constraint that rejects only lines with both sides set: that version made this test fail, and none of the existing tests caught it.
 - `IncomeStatementServiceTest` reports `tests="0"` at suite level because its 16 tests live in nested classes. All 16 ran and passed.
 
 ## How to reproduce
