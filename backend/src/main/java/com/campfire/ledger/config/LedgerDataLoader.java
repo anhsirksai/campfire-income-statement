@@ -104,10 +104,12 @@ public class LedgerDataLoader implements ApplicationRunner {
         List<LedgerSnapshot.Account> accounts = file.accounts().stream()
                 .map(a -> new LedgerSnapshot.Account(a.number(), a.type(), a.subtype()))
                 .toList();
+        // A missing "lines" array becomes an empty list, so MinimumTwoLinesRule reports it instead of an NPE here.
         List<LedgerSnapshot.Entry> entries = file.journalEntries().stream()
-                .map(e -> new LedgerSnapshot.Entry(e.id(), e.date(), e.status(), e.lines().stream()
-                        .map(l -> new LedgerSnapshot.Line(l.account(), l.debit(), l.credit()))
-                        .toList()))
+                .map(e -> new LedgerSnapshot.Entry(e.id(), e.date(), e.status(),
+                        (e.lines() == null ? List.<LedgerFile.LineJson>of() : e.lines()).stream()
+                                .map(l -> new LedgerSnapshot.Line(l.account(), l.debit(), l.credit()))
+                                .toList()))
                 .toList();
         return new LedgerSnapshot(accounts, entries);
     }

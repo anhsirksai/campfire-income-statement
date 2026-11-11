@@ -36,7 +36,10 @@ made 7 service tests fail, so the tests do catch real accounting mistakes.
 | Rules | Real ledger passes every ledger rule | `RealLedgerRulesTest` |
 | Rules | Account type and subtype must agree (expense typed + operating_revenue fails) | `AccountClassificationRuleTest` |
 | Rules | Amounts have at most 2 decimals (`0.005` fails, `100.000` passes) | `AmountScaleRuleTest` |
-| Database | Direct inserts rejected: both sides, negative, duplicate line position, unknown status, type/subtype mismatch | `SchemaConstraintsTest` |
+| Rules | Missing debit, credit, entry id, date or account number is reported, not read as 0 | `RequiredFieldsRuleTest` |
+| Rules | Duplicate entry ids and account numbers are reported | `UniqueIdsRuleTest` |
+| Loader | Missing amount or missing `lines` stops startup with a message, before any insert (was an NPE in the DAO) | `LedgerDataLoaderTest.missingAmountOrLinesIsReportedNotAnInsertCrash` |
+| Database | Direct inserts rejected: both sides, neither side, negative, duplicate line position, unknown status, type/subtype mismatch | `SchemaConstraintsTest` |
 | Frontend | Money formatting, Q1 table render, 400 → error message | `money.test.ts`, `IncomeStatementTable.test.tsx`, `client.test.ts` |
 | End to end | Verifier run: golden ranges and error cases | `docs/verification-report.md` |
 

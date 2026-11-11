@@ -17,6 +17,7 @@ import com.campfire.ledger.validation.ValidationRegistry;
 import com.campfire.validation.api.LedgerSnapshot;
 import com.campfire.validation.api.ValidationResult;
 import com.campfire.validation.api.ValidationRule;
+import com.campfire.validation.rules.ValidationRules;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.math.BigDecimal;
@@ -80,6 +81,30 @@ class LedgerDataLoaderTest {
         assertThatThrownBy(() -> loader(file, BALANCED).run(null))
                 .isInstanceOf(LedgerDataException.class)
                 .hasMessageContaining("JE-1 is not balanced");
+        verify(companyDao, never()).insert(any());
+        verify(journalLineDao, never()).insert(any(), anyInt(), any());
+    }
+
+    @Test
+    void missingAmountOrLinesIsReportedNotAnInsertCrash(@TempDir Path dir) throws Exception {
+        // JE-1's missing debit would "balance" if read as 0; before RequiredFieldsRule it crashed in JournalLineDao.
+        Path file = Files.writeString(dir.resolve("ledger.json"), """
+                {"company": "Test Co", "currency": "USD",
+                 "accounts": [
+                   {"number": "1000", "name": "Cash", "type": "asset", "subtype": "balance_sheet", "is_active": true},
+                   {"number": "4000", "name": "Sales", "type": "revenue", "subtype": "operating_revenue", "is_active": true}],
+                 "journal_entries": [
+                   {"id": "JE-1", "date": "2026-01-05", "status": "posted", "lines": [
+                     {"account": "1000", "debit": "100.00", "credit": "0.00"},
+                     {"account": "4000", "credit": "100.00"}]},
+                   {"id": "JE-2", "date": "2026-01-06", "status": "posted"}]}
+                """);
+
+        assertThatThrownBy(() -> new LedgerDataLoader(JSON, new ValidationRegistry(ValidationRules.all()),
+                companyDao, accountDao, journalEntryDao, journalLineDao, file).run(null))
+                .isInstanceOf(LedgerDataException.class)
+                .hasMessageContaining("JE-1 line 2 is missing a debit amount")
+                .hasMessageContaining("JE-2 has 0 lines; an entry needs at least 2");
         verify(companyDao, never()).insert(any());
         verify(journalLineDao, never()).insert(any(), anyInt(), any());
     }

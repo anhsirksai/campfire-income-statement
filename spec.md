@@ -162,7 +162,10 @@ Other ranges: Dec 2025 → NI 5,000.00 (JE-001 only). April 2026 → NI 9,100.00
   the rules whose `target()` matches the input.
 - Why not a runtime-loaded plugin jar (the first design): URLClassLoader + ServiceLoader added concepts the
   hand-extension round does not need. A normal dependency keeps "new rule = enum + one line" with nothing to deploy.
-- Request rules: `DateRangePresentRule`, `StartNotAfterEndRule`. Ledger rules: `EntryBalancedRule`,
+- Request rules: `DateRangePresentRule`, `StartNotAfterEndRule`. Ledger rules: `RequiredFieldsRule`
+  (account number, entry id, date, debit and credit present; the other rules read a missing amount as 0, so
+  without it a bad ledger would pass and crash on insert), `UniqueIdsRule` (entry ids and account numbers),
+  `EntryBalancedRule`,
   `LineOneSidedRule`, `NonNegativeAmountRule`, `AmountScaleRule` (at most 2 decimals), `KnownAccountRule`,
   `AccountClassificationRule` (type and subtype agree: the section comes from subtype, the sign from type),
   `KnownStatusRule`, `MinimumTwoLinesRule`.

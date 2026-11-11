@@ -14,7 +14,9 @@ public final class ValidationRules {
                 // Request: ReportPeriodInput
                 DateRangePresentRule.INSTANCE,
                 StartNotAfterEndRule.INSTANCE,
-                // Ledger data at startup: LedgerSnapshot
+                // Ledger data at startup: LedgerSnapshot. Missing and duplicate fields first, so they lead the error list.
+                RequiredFieldsRule.INSTANCE,
+                UniqueIdsRule.INSTANCE,
                 EntryBalancedRule.INSTANCE,
                 LineOneSidedRule.INSTANCE,
                 NonNegativeAmountRule.INSTANCE,

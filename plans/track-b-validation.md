@@ -37,6 +37,8 @@ lists all 8 rules.
 ## Status
 Done: 8 rules registered, 33 rule tests + 8 backend tests, `mvn -q verify` green. `spring-boot:run` logs
 `Loaded 8 validation rules`; missing/inverted dates return 400 with the rule messages.
+Later, after code review: `AmountScaleRule`, `AccountClassificationRule`, `RequiredFieldsRule` and
+`UniqueIdsRule` were added, so the app now loads 12 rules (2 request, 10 ledger).
 Assumptions: null debit/credit count as zero; null status or account is reported as unknown (not an NPE).
 
 ## Cross-track requests
