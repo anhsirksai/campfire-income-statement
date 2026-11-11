@@ -1,0 +1,23 @@
+# Paths are relative to the repo root: spring-boot:run and surefire both use it as the working directory.
+app:
+  ledger-file: data/ledger.json
+
+server:
+  port: 8080
+
+spring:
+  application:
+    name: income-statement
+  datasource:
+    url: jdbc:h2:mem:ledger;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    username: sa
+    password: ""
+  sql:
+    init:
+      mode: always          # runs schema.sql on startup
+  h2:
+    console:
+      enabled: true         # http://localhost:8080/h2-console, JDBC URL above
+  jackson:
+    generator:
+      write-bigdecimal-as-plain: true
